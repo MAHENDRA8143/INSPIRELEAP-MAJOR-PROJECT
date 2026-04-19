@@ -1,11 +1,18 @@
 from __future__ import annotations
 
 from typing import Tuple
+from pathlib import Path
 
 import cv2
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
+
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+DATA_DIR = PROJECT_ROOT / "data"
+MNIST_DATASET_PATH = DATA_DIR / "mnist.npz"
+MNIST_DATASET_URL = "https://storage.googleapis.com/tensorflow/tf-keras-datasets/mnist.npz"
 
 
 def normalize_images(images: np.ndarray) -> np.ndarray:
@@ -77,9 +84,30 @@ def get_data_generator() -> ImageDataGenerator:
 
 def load_mnist_dataset(
     enable_advanced_preprocessing: bool = True,
-    path: str = "mnist.npz",
+    path: str | Path = MNIST_DATASET_PATH,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-    (x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data(path=path)
+    dataset_path = Path(path)
+    dataset_path.parent.mkdir(parents=True, exist_ok=True)
+
+    if dataset_path.exists():
+        with np.load(dataset_path) as data:
+            x_train, y_train = data["x_train"], data["y_train"]
+            x_test, y_test = data["x_test"], data["y_test"]
+    else:
+        downloaded_path = Path(
+            tf.keras.utils.get_file(
+                fname=dataset_path.name,
+                origin=MNIST_DATASET_URL,
+                cache_dir=str(dataset_path.parent),
+                cache_subdir="",
+            )
+        )
+        if downloaded_path != dataset_path and downloaded_path.exists():
+            dataset_path.write_bytes(downloaded_path.read_bytes())
+
+        with np.load(dataset_path) as data:
+            x_train, y_train = data["x_train"], data["y_train"]
+            x_test, y_test = data["x_test"], data["y_test"]
 
     x_train = normalize_images(x_train)
     x_test = normalize_images(x_test)

@@ -34,6 +34,7 @@ flowchart TD
 ```text
 digit-ai-system/
 ├── data/
+│   └── mnist.npz
 ├── models/
 │   ├── cnn_model.h5
 │   ├── model.tflite
@@ -139,6 +140,10 @@ kubectl apply -f k8s/service.yaml
 ```bash
 pytest -q
 ```
+
+## Dataset Location
+- The MNIST dataset is stored in `data/mnist.npz`.
+- If the file is missing, the training pipeline downloads it automatically into `data/`.
 
 ## Model Versioning
 - `models/model_registry.json` stores versioned model metadata and metrics.
