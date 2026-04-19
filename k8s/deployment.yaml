@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: digit-ai-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: digit-ai-system
+  template:
+    metadata:
+      labels:
+        app: digit-ai-system
+    spec:
+      containers:
+        - name: digit-ai-system
+          image: digit-ai-system:latest
+          ports:
+            - containerPort: 8000
+            - containerPort: 8501
